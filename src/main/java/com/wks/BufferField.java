@@ -11,4 +11,6 @@ public @interface BufferField {
     int order();
 
     int maxLength();
+
+    Class<? extends Converter>[] converter() default {};
 }

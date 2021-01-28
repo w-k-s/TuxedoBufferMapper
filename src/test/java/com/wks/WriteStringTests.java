@@ -1,5 +1,6 @@
 package com.wks;
 
+import com.wks.models.MultipleFieldsWithSameOrderObject;
 import com.wks.models.NullStringContainer;
 import com.wks.models.StringPadding;
 import com.wks.models.TestOrderObject;
@@ -61,5 +62,14 @@ public class WriteStringTests {
 
         // Then
         assertEquals("          ", tuxedoMessage);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void multipleFieldsWithSameOrderThrowsException() {
+        // Given
+        MultipleFieldsWithSameOrderObject object = new MultipleFieldsWithSameOrderObject("Bob", "Bob");
+
+        // When
+        new TuxedoBufferMapper().writeValueAsString(object);
     }
 }
