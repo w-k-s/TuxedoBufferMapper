@@ -1,5 +1,7 @@
 package com.wks;
 
+import com.wks.exceptions.NumberTooLargeException;
+
 class NumberConverter implements Converter<Number> {
 
     @Override

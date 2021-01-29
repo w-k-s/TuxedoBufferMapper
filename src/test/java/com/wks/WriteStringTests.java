@@ -1,5 +1,7 @@
 package com.wks;
 
+import com.wks.exceptions.NonSequentialOrderException;
+import com.wks.exceptions.NonUniqueOrderException;
 import com.wks.models.*;
 import org.junit.Test;
 
@@ -68,7 +70,7 @@ public class WriteStringTests {
 
         // When
         assertThatThrownBy(()->new TuxedoBufferMapper().writeValueAsString(object))
-                .isInstanceOf(RuntimeException.class)
+                .isExactlyInstanceOf(NonUniqueOrderException.class)
                 .hasMessage("Multiple fields can not have the same order. Duplicate order: 1, Field: lastName");
     }
 
@@ -79,7 +81,7 @@ public class WriteStringTests {
 
         // When
         assertThatThrownBy(()->new TuxedoBufferMapper().writeValueAsString(object))
-                .isInstanceOf(RuntimeException.class)
+                .isExactlyInstanceOf(NonSequentialOrderException.class)
                 .hasMessage("Non-sequential orders: 1 and 10");
     }
 }

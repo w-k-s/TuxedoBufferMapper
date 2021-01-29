@@ -1,5 +1,9 @@
 package com.wks;
 
+import com.wks.exceptions.NonSequentialOrderException;
+import com.wks.exceptions.NonUniqueOrderException;
+import com.wks.exceptions.TuxedoBufferMapperException;
+
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -86,7 +90,7 @@ public class TuxedoBufferMapper {
                     try {
                         return converterClazz.newInstance();
                     } catch (InstantiationException | IllegalAccessException e) {
-                        throw new RuntimeException("Exception while creating converter for class " + clazz);
+                        throw new TuxedoBufferMapperException("Exception while creating converter for class " + clazz, e);
                     }
                 })
                 .orElseThrow(() -> new NullPointerException("Converter not registered: " + clazz));
@@ -99,7 +103,7 @@ public class TuxedoBufferMapper {
 
     private void validateOrdersAreUnique(int order, String fieldName) {
         if (!usedOrders.add(order)) {
-            throw new RuntimeException(String.format("Multiple fields can not have the same order. Duplicate order: %d, Field: %s", order, fieldName));
+            throw new NonUniqueOrderException(order, fieldName);
         }
     }
 
@@ -111,7 +115,7 @@ public class TuxedoBufferMapper {
             int current = usedOrders.get(i);
             int next = usedOrders.get(i + 1);
             if (Math.abs(current - next) > 1) {
-                throw new RuntimeException(String.format("Non-sequential orders: %d and %d", current, next));
+                throw new NonSequentialOrderException(current, next);
             }
         }
     }
