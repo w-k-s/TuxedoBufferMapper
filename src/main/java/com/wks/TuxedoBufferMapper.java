@@ -17,7 +17,7 @@ public class TuxedoBufferMapper {
     }
 
     private Map<Class<?>, Class<? extends Converter>> converters;
-    private Set<Integer> usedOrders = new HashSet<>();
+    private Set<Integer> usedOrders = new TreeSet<>();
 
     public TuxedoBufferMapper() {
         this.converters = DEFAULT_CONVERTERS;
@@ -39,7 +39,7 @@ public class TuxedoBufferMapper {
             field.setAccessible(true);
             if (field.isAnnotationPresent(BufferField.class)) {
                 final BufferField property = field.getAnnotation(BufferField.class);
-                checkOrder(property.order(), getFieldName(field));
+                validateOrdersAreUnique(property.order(), getFieldName(field));
                 if (property.converter().length > 0) {
                     String value = createConverter(field.getType()).convert(getFieldValue(field, object), property.maxLength());
                     serializedFields.put(property.order(), trim(value, property.maxLength()));
@@ -57,6 +57,8 @@ public class TuxedoBufferMapper {
                 }
             }
         }
+
+        validateOrdersAreSequential();
 
         return serializedFields.entrySet()
                 .stream()
@@ -95,9 +97,22 @@ public class TuxedoBufferMapper {
         return field;
     }
 
-    private void checkOrder(int order, String fieldName) {
+    private void validateOrdersAreUnique(int order, String fieldName) {
         if (!usedOrders.add(order)) {
             throw new RuntimeException(String.format("Multiple fields can not have the same order. Duplicate order: %d, Field: %s", order, fieldName));
+        }
+    }
+
+    private void validateOrdersAreSequential() {
+        if (this.usedOrders.isEmpty()) return;
+
+        List<Integer> usedOrders = new ArrayList<>(this.usedOrders);
+        for (int i = 0; i + 1 < usedOrders.size(); i++) {
+            int current = usedOrders.get(i);
+            int next = usedOrders.get(i + 1);
+            if (Math.abs(current - next) > 1) {
+                throw new RuntimeException(String.format("Non-sequential orders: %d and %d", current, next));
+            }
         }
     }
 
