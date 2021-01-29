@@ -1,11 +1,11 @@
 package com.wks;
 
-import com.wks.exceptions.NonSequentialOrderException;
-import com.wks.exceptions.NonUniqueOrderException;
 import com.wks.exceptions.TuxedoBufferMapperException;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TuxedoBufferMapper {
@@ -17,7 +17,6 @@ public class TuxedoBufferMapper {
             .build();
 
     private final Converters converters;
-    private final Set<Integer> usedOrders = new TreeSet<>();
 
     public TuxedoBufferMapper() {
         this(DEFAULT_CONVERTERS);
@@ -30,13 +29,14 @@ public class TuxedoBufferMapper {
     public String writeValueAsString(Object object) {
         if (object == null) return null;
 
+        final OrderValidator validator = OrderValidator.start();
         final Class<?> clazz = object.getClass();
         final Map<Integer, String> serializedFields = new HashMap<>();
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(BufferField.class)) {
                 final BufferField property = field.getAnnotation(BufferField.class);
-                validateOrdersAreUnique(property.order(), getFieldName(field));
+                validator.validateOrderIsUnique(property.order(), getFieldName(field));
                 if (property.converter().length > 0) {
                     String value = instantiateConverter(property.converter()[0]).convert(getFieldValue(field, object), property.maxLength());
                     serializedFields.put(property.order(), trim(value, property.maxLength()));
@@ -55,7 +55,7 @@ public class TuxedoBufferMapper {
             }
         }
 
-        validateOrdersAreSequential();
+        validator.validateOrdersAreSequential();
 
         return serializedFields.entrySet()
                 .stream()
@@ -100,25 +100,6 @@ public class TuxedoBufferMapper {
     private String trim(String field, int maxLength) {
         if (field.length() >= maxLength) return field.substring(0, maxLength);
         return field;
-    }
-
-    private void validateOrdersAreUnique(int order, String fieldName) {
-        if (!usedOrders.add(order)) {
-            throw new NonUniqueOrderException(order, fieldName);
-        }
-    }
-
-    private void validateOrdersAreSequential() {
-        if (this.usedOrders.isEmpty()) return;
-
-        List<Integer> usedOrders = new ArrayList<>(this.usedOrders);
-        for (int i = 0; i + 1 < usedOrders.size(); i++) {
-            int current = usedOrders.get(i);
-            int next = usedOrders.get(i + 1);
-            if (Math.abs(current - next) > 1) {
-                throw new NonSequentialOrderException(current, next);
-            }
-        }
     }
 
     private String getFieldName(Field field) {
