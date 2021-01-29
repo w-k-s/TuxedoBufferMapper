@@ -37,8 +37,8 @@ public final class Converters {
             value = new HashMap<>();
         }
 
-        public Assignment assignType(Class<?> type) {
-            return new Assignment(this, type);
+        public Link setConverter(Class<? extends Converter> converter) {
+            return new Link(this, converter);
         }
 
         public Converters build() {
@@ -46,18 +46,18 @@ public final class Converters {
         }
     }
 
-    static final class Assignment {
+    static final class Link {
 
         private final Builder builder;
-        private final Class<?> type;
+        private final Class<? extends Converter> converter;
 
-        private Assignment(Builder builder, Class<?> type) {
+        private Link(Builder builder, Class<? extends Converter> converter) {
             this.builder = builder;
-            this.type = type;
+            this.converter = converter;
         }
 
-        public Builder withConverter(Class<? extends Converter> converter) {
-            builder.value.put(this.type, converter);
+        public Builder forType(Class<?> type) {
+            builder.value.put(type, this.converter);
             return builder;
         }
     }

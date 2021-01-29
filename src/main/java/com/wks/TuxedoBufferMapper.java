@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 public class TuxedoBufferMapper {
 
     private final static Converters DEFAULT_CONVERTERS = Converters.builder()
-            .assignType(String.class).withConverter(StringConverter.class)
-            .assignType(Number.class).withConverter(NumberConverter.class)
-            .assignType(Boolean.class).withConverter(BooleanConverter.class)
+            .setConverter(StringConverter.class).forType(String.class)
+            .setConverter(NumberConverter.class).forType(Number.class)
+            .setConverter(BooleanConverter.class).forType(Boolean.class)
             .build();
 
     private final Converters converters;

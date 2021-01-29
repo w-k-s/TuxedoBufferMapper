@@ -18,7 +18,7 @@ public class WriteCustomConverterTests {
 
         // When
         final String tuxedoMessage = new TuxedoBufferMapper(Converters.builder()
-                .assignType(String.class).withConverter(HodorConverter.class)
+                .setConverter(HodorConverter.class).forType(String.class)
                 .build()
         ).writeValueAsString(object);
 
