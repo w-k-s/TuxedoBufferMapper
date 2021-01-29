@@ -64,23 +64,34 @@ public class WriteStringTests {
     }
 
     @Test
+    public void toStringConverterRespectsPadding() {
+        // Given
+        final ToStringConverterObject object = new ToStringConverterObject(ToStringConverterObject.Direction.WEST);
+
+        // When
+        final String tuxedoMessage = new TuxedoBufferMapper().writeValueAsString(object);
+
+        assertThat(tuxedoMessage).isEqualTo("WEST ");
+    }
+
+    @Test
     public void multipleFieldsWithSameOrderThrowsException() {
         // Given
         MultipleFieldsWithSameOrderObject object = new MultipleFieldsWithSameOrderObject("Bob", "Bob");
 
         // When
-        assertThatThrownBy(()->new TuxedoBufferMapper().writeValueAsString(object))
+        assertThatThrownBy(() -> new TuxedoBufferMapper().writeValueAsString(object))
                 .isExactlyInstanceOf(NonUniqueOrderException.class)
                 .hasMessage("Multiple fields can not have the same order. Duplicate order: 1, Field: lastName");
     }
 
     @Test
-    public void nonsequentialOrdersThrowsException(){
+    public void nonsequentialOrdersThrowsException() {
         // Given
         NonsequentialOrdersObject object = new NonsequentialOrdersObject("Bob", "Bob");
 
         // When
-        assertThatThrownBy(()->new TuxedoBufferMapper().writeValueAsString(object))
+        assertThatThrownBy(() -> new TuxedoBufferMapper().writeValueAsString(object))
                 .isExactlyInstanceOf(NonSequentialOrderException.class)
                 .hasMessage("Non-sequential orders: 1 and 10");
     }

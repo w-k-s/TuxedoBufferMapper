@@ -4,6 +4,6 @@ public class ToStringConverter implements Converter<Object> {
     @Override
     public String convert(Object field, int maxLength) {
         if (field == null) return Character.whitespace.repeat(maxLength);
-        return field.toString();
+        return StringUtils.padRight(field.toString(), maxLength, ' ');
     }
 }
