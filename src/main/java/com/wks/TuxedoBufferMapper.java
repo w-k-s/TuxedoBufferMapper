@@ -29,9 +29,10 @@ public class TuxedoBufferMapper {
     public String writeValueAsString(Object object) {
         if (object == null) return null;
 
-        final OrderValidator validator = OrderValidator.start();
         final Class<?> clazz = object.getClass();
+        final OrderValidator validator = OrderValidator.newSession();
         final Map<Integer, String> serializedFields = new HashMap<>();
+
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(BufferField.class)) {
@@ -78,14 +79,8 @@ public class TuxedoBufferMapper {
     }
 
     private <T> Converter<T> createConverter(Class<T> clazz) {
-        return converters.get(clazz)
-                .map(converterClazz -> {
-                    try {
-                        return converterClazz.newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new TuxedoBufferMapperException("Exception while creating converter for class " + clazz, e);
-                    }
-                })
+        return (Converter<T>) converters.get(clazz)
+                .map(this::instantiateConverter)
                 .orElseThrow(() -> new NullPointerException("Converter not registered: " + clazz));
     }
 

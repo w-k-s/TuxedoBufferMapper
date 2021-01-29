@@ -14,7 +14,7 @@ class OrderValidator {
         this.usedOrders = new TreeSet<>();
     }
 
-    static OrderValidator start() {
+    static OrderValidator newSession() {
         return new OrderValidator();
     }
 
