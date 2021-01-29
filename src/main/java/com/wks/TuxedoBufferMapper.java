@@ -23,10 +23,10 @@ public class TuxedoBufferMapper {
         this.converters = DEFAULT_CONVERTERS;
     }
 
-    public TuxedoBufferMapper(Map<Class<?>, Class<? extends Converter>> customConverters) {
+    public TuxedoBufferMapper(Converters customConverters) {
         final Map<Class<?>, Class<? extends Converter>> allConverters = new HashMap<>();
         allConverters.putAll(DEFAULT_CONVERTERS); // allow default converters to be replaced
-        allConverters.putAll(customConverters);
+        allConverters.putAll(customConverters.get());
         this.converters = Collections.unmodifiableMap(allConverters);
     }
 

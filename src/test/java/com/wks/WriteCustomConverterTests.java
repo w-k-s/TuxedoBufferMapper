@@ -21,11 +21,12 @@ public class WriteCustomConverterTests {
 
     @Before
     public void setup() {
-        Map<Class<?>, Class<? extends Converter>> converters = new HashMap<>();
-        converters.put(LocalDate.class, LocalDateConverter.class);
-        converters.put(LocalDateTime.class, LocalDateTimeConverter.class);
-        converters.put(OffsetDateTime.class, OffsetDateTimeConverter.class);
-        converters.put(String.class, HodorConverter.class);
+        final Converters converters = Converters.builder()
+                .assignType(LocalDate.class).withConverter(LocalDateConverter.class)
+                .assignType(LocalDateTime.class).withConverter(LocalDateTimeConverter.class)
+                .assignType(OffsetDateTime.class).withConverter(OffsetDateTimeConverter.class)
+                .assignType(String.class).withConverter(HodorConverter.class)
+                .build();
 
         mapper = new TuxedoBufferMapper(converters);
     }
