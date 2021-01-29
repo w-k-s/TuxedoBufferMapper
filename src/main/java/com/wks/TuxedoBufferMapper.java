@@ -10,28 +10,21 @@ import java.util.stream.Collectors;
 
 public class TuxedoBufferMapper {
 
-    private final static Map<Class<?>, Class<? extends Converter>> DEFAULT_CONVERTERS;
+    private final static Converters DEFAULT_CONVERTERS = Converters.builder()
+            .assignType(String.class).withConverter(StringConverter.class)
+            .assignType(Number.class).withConverter(NumberConverter.class)
+            .assignType(Boolean.class).withConverter(BooleanConverter.class)
+            .build();
 
-    static {
-        Map<Class<?>, Class<? extends Converter>> _converters = new HashMap<>();
-        _converters.put(String.class, StringConverter.class);
-        _converters.put(Number.class, NumberConverter.class);
-        _converters.put(Boolean.class, BooleanConverter.class);
-        DEFAULT_CONVERTERS = Collections.unmodifiableMap(_converters);
-    }
-
-    private Map<Class<?>, Class<? extends Converter>> converters;
-    private Set<Integer> usedOrders = new TreeSet<>();
+    private final Converters converters;
+    private final Set<Integer> usedOrders = new TreeSet<>();
 
     public TuxedoBufferMapper() {
-        this.converters = DEFAULT_CONVERTERS;
+        this(DEFAULT_CONVERTERS);
     }
 
     public TuxedoBufferMapper(Converters customConverters) {
-        final Map<Class<?>, Class<? extends Converter>> allConverters = new HashMap<>();
-        allConverters.putAll(DEFAULT_CONVERTERS); // allow default converters to be replaced
-        allConverters.putAll(customConverters.get());
-        this.converters = Collections.unmodifiableMap(allConverters);
+        this.converters = DEFAULT_CONVERTERS.appendOrOverwriteWith(customConverters);
     }
 
     public String writeValueAsString(Object object) {
@@ -68,8 +61,8 @@ public class TuxedoBufferMapper {
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(Map.Entry::getValue)
-                .map(String::toUpperCase)
-                .collect(Collectors.joining(""));
+                .collect(Collectors.joining(""))
+                .toUpperCase();
     }
 
     private <T> T getFieldValue(Field field, Object object) {
@@ -85,7 +78,7 @@ public class TuxedoBufferMapper {
     }
 
     private <T> Converter<T> createConverter(Class<T> clazz) {
-        return Optional.ofNullable(converters.get(clazz))
+        return converters.get(clazz)
                 .map(converterClazz -> {
                     try {
                         return converterClazz.newInstance();

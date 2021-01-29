@@ -1,7 +1,5 @@
 package com.wks.exceptions;
 
-import com.wks.TuxedoBufferMapper;
-
 public class TuxedoBufferMapperException extends RuntimeException {
     public TuxedoBufferMapperException(String message) {
         super(message);

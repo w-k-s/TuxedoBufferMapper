@@ -3,16 +3,27 @@ package com.wks;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class Converters {
     private Map<Class<?>, Class<? extends Converter>> value;
 
-    private Converters(Builder builder) {
-        this.value = Collections.unmodifiableMap(builder.value);
+    private Converters(Map<Class<?>, Class<? extends Converter>> value) {
+        this.value = Collections.unmodifiableMap(value);
+    }
+
+    Converters appendOrOverwriteWith(Converters converters) {
+        final Map<Class<?>, Class<? extends Converter>> combined = new HashMap<>(value);
+        combined.putAll(converters.get());
+        return new Converters(combined);
     }
 
     Map<Class<?>, Class<? extends Converter>> get() {
         return value;
+    }
+
+    Optional<Class<? extends Converter>> get(Class<?> clazz) {
+        return Optional.ofNullable(this.value.get(clazz));
     }
 
     public static Builder builder() {
@@ -31,7 +42,7 @@ public final class Converters {
         }
 
         public Converters build() {
-            return new Converters(this);
+            return new Converters(this.value);
         }
     }
 
