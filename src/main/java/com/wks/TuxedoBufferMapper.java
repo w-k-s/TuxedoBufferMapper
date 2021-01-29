@@ -38,7 +38,7 @@ public class TuxedoBufferMapper {
                 final BufferField property = field.getAnnotation(BufferField.class);
                 validateOrdersAreUnique(property.order(), getFieldName(field));
                 if (property.converter().length > 0) {
-                    String value = createConverter(field.getType()).convert(getFieldValue(field, object), property.maxLength());
+                    String value = instantiateConverter(property.converter()[0]).convert(getFieldValue(field, object), property.maxLength());
                     serializedFields.put(property.order(), trim(value, property.maxLength()));
                 } else if (field.getType().equals(String.class)) {
                     String value = createConverter(String.class).convert(getFieldValue(field, object), property.maxLength());
@@ -87,6 +87,14 @@ public class TuxedoBufferMapper {
                     }
                 })
                 .orElseThrow(() -> new NullPointerException("Converter not registered: " + clazz));
+    }
+
+    private <T> Converter<T> instantiateConverter(Class<? extends Converter> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new TuxedoBufferMapperException("Exception while creating converter: " + clazz, e);
+        }
     }
 
     private String trim(String field, int maxLength) {

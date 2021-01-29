@@ -1,6 +1,7 @@
 package com.wks;
 
 import com.wks.exceptions.NumberTooLargeException;
+import com.wks.models.Money;
 import com.wks.models.NumberPadding;
 import com.wks.models.NumberTooLarge;
 import org.junit.Test;
@@ -46,4 +47,15 @@ public class WriteNumberTests {
         assertThat(tuxedoMessage).isEqualTo("00000000000000.0000000.000000000000000000");
     }
 
+    @Test
+    public void bigDecimalScaleIsRespectedByDefault() {
+        //Given
+        Money money = new Money(Money.CurrencyCode.USD, BigDecimal.TEN);
+
+        // When
+        String tuxedoMessage = new TuxedoBufferMapper().writeValueAsString(money);
+
+        // Then
+        assertThat(tuxedoMessage).isEqualTo("0000010.00USD");
+    }
 }

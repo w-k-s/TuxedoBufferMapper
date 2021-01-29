@@ -10,17 +10,6 @@ import java.time.Month
 
 class WriteDataClassTests {
 
-    private lateinit var mapper : TuxedoBufferMapper
-
-    @Before
-    fun setup() {
-        val converters = Converters.builder()
-            .assignType(LocalDate::class.java).withConverter(LocalDateConverter::class.java)
-            .build()
-
-        mapper = TuxedoBufferMapper(converters)
-    }
-
     @Test
     fun annotationsOnDataClassConstructorAreProcessed() {
         // Given
@@ -32,7 +21,7 @@ class WriteDataClassTests {
         )
 
         // When
-        val result = mapper.writeValueAsString(container)
+        val result = TuxedoBufferMapper().writeValueAsString(container)
 
         // Then
         assertThat(result).isEqualTo("JOHN                EXAMPLE             20200101Y")
